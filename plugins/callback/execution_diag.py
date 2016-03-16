@@ -1,9 +1,5 @@
-# Adapted from:
-# https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/callback/profile_tasks.rst
+#
 # (C) 2016  Matt Young <halcyondude@gmail.com>
-# (C) 2015, Tom Paine, <github@aioue.net>
-# (C) 2014, Jharrod LaFon, @JharrodLaFon
-# (C) 2012-2013, Michael DeHaan, <michael.dehaan@gmail.com>
 #
 # This file is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +13,6 @@
 #
 # See <http://www.gnu.org/licenses/> for a copy of the
 # GNU General Public License
-
-# Provides per-task timing, ongoing playbook elapsed time and
-# ordered list of top 15 longest running tasks at end
 
 # Make coding more python3-ish
 from __future__ import (absolute_import, division, print_function)
@@ -47,9 +40,6 @@ class CallbackModule(CallbackBase):
     CALLBACK_NEEDS_WHITELIST = True
 
     def __init__(self):
-        self.stats = {}
-        self.current = None
-
         super(CallbackModule, self).__init__()
 
     def _log(self, msg):
