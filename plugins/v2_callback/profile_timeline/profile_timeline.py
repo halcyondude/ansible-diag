@@ -43,22 +43,22 @@ from ansible.plugins.callback import CallbackBase
 # define start time
 t0 = tn = time.time()
 
-def secondsToStr(t):
-    # http://bytes.com/topic/python/answers/635958-handy-short-cut-formatting-elapsed-time-floating-point-seconds
-    rediv = lambda ll, b: list(divmod(ll[0], b)) + ll[1:]
-    return "%d:%02d:%02d.%03d" % tuple(reduce(rediv, [[t * 1000, ], 1000, 60, 60]))
+# width for default printing
+default_width = 79
 
 
 def filled(msg, fchar="*"):
-    if len(msg) == 0:
-        width = 79
+    return msg.ljust(default_width - 3, fchar) + fchar*3
+
+
+def seconds_to_hms(seconds_delta, show_subsec=False):
+    m, s = divmod(seconds_delta, 60)
+    h, m = divmod(m, 60)
+    if show_subsec:
+        msg = "%d:%d:%.3f" % (h, m, s)
     else:
-        msg = "%s " % msg
-        width = 79 - len(msg)
-    if width < 3:
-        width = 3
-    filler = fchar * width
-    return "%s%s " % (msg, filler)
+        msg = "%d:%02d:%02d" % (h, m, s)
+    return msg
 
 
 def timestamp(self):
@@ -68,10 +68,11 @@ def timestamp(self):
 def tasktime():
     global tn
     time_current = time.strftime('%A %d %B %Y  %H:%M:%S %z')
-    time_elapsed = secondsToStr(time.time() - tn)
-    time_total_elapsed = secondsToStr(time.time() - t0)
+    time_elapsed = seconds_to_hms(time.time() - tn, True)
+    time_total_elapsed = seconds_to_hms(time.time() - t0, True)
     tn = time.time()
-    return filled('%s (%s)%s%s' % (time_current, time_elapsed, ' ' * 7, time_total_elapsed))
+    msg = '%s (%s)%s%s ' % (time_current, time_elapsed, ' ' * 7, time_total_elapsed)
+    return filled(msg)
 
 def seconds_to_hms(seconds):
     m, s = divmod(seconds, 60)
@@ -94,6 +95,10 @@ class CallbackModule(CallbackBase):
 
         super(CallbackModule, self).__init__()
 
+    def _timestamp(self):
+        if self.current is not None:
+            self.stats[self.current][1] = time.time() - self.stats[self.current][0]
+
     def _log(self, msg):
         # TODO: make this better, handle varargs
         # note: display(self, msg, color=None, stderr=False, screen_only=False, log_only=False)
@@ -104,7 +109,7 @@ class CallbackModule(CallbackBase):
         Logs the start of each task
         """
         self._log(tasktime())
-        timestamp(self)
+        self._timestamp()
 
         # Record the start time of the current task
         # note: self.stats[taskname] = [ start_time, elapsed_time ]
@@ -122,9 +127,9 @@ class CallbackModule(CallbackBase):
 
     def playbook_on_stats(self, stats):
         self._log(tasktime())
-        self._log(filled("", fchar="="))
+        self._log(filled("", "="))
 
-        timestamp(self)
+        self._timestamp()
 
         # sort tasks by start time
         timeline = sorted(
@@ -153,7 +158,7 @@ class CallbackModule(CallbackBase):
         # Just keep the top 15
         results = results[:15]
 
-        self._log(filled(("-------- Top 15 Tasks (by elapsed time)"), fchar="-"))
+        self._log(filled("-------- Top 15 Tasks (by elapsed time)", fchar="-"))
 
         for name, times in results:
             self._log(
