@@ -1,0 +1,22 @@
+- name: Some interesting task 1 (sleep 0.5)
+  command: sleep 0.5
+
+- name: Some interesting task 2 (sleep 1.0)
+  command: sleep 1
+
+- name: Some interesting task 3 (sleep 1.5)
+  command: sleep 1.5
+
+- name: Some interesting task 4 (sleep 2.0)
+  command: sleep 2
+
+- name: Some interesting task 5 (sleep 1.5)
+  command: sleep 1.5
+
+- name: Some interesting task 6 (sleep 1.0)
+  command: sleep 1
+
+- name: Some interesting task 7 (sleep 0.5)
+  command: sleep 0.5
+
+
